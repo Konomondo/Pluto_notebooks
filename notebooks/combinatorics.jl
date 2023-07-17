@@ -59,7 +59,7 @@ begin
 		md""" 
 		# Packages
 		
-		Some Package sources not added, this will take approx. 3 minutes"""
+		Some Package sources not added, this will take approx. 3 minutes """
 	end
 	=#
 end
