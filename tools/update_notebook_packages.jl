@@ -1,5 +1,6 @@
 
 import Pluto
+using Pkg
 
 flatmap(args...) = vcat(map(args...)...)
 
