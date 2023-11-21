@@ -4,7 +4,7 @@ using Pkg
 
 flatmap(args...) = vcat(map(args...)...)
 
-
+pwd()
 all_files_recursive = flatmap(walkdir("./")) do (root, _dirs, files)
     joinpath.((root,), files)
 end
