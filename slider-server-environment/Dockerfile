@@ -1,38 +1,17 @@
-# Hi there!
+# Runtime for the interactive Pluto notebooks. Keep Julia aligned with deploy.yaml.
+FROM julia:1.12.7
 
-# This Dockerfile does _not_ run the Pluto notebooks. You cannot use it to work on the homework exercises. Instead, take a look at our website to learn how to get started with Pluto: http://computationalthinking.mit.edu . If you want to run a Pluto Container (e.g. for homework) take a look here: https://github.com/JuliaPluto/docker-stacks
-
-# This is an internal Dockerfile for the Pluto "@bind server" for the course website. It runs all the sliders, buttons and camera inputs, so that you can interact with them directly on the website, without having to wait for binder or a local Pluto session.
-# Take a look at https://github.com/JuliaPluto/PlutoBindServer.jl for more info.
-
-# -fonsi
-
-FROM julia:1.9
-
-# HTTP port
 EXPOSE 1234
-RUN apt-get update -y && apt-get upgrade -y
-
-# we need unzip for Blink
-RUN apt-get install -y unzip
-
-# add a new user called "pluto"
+RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash pluto
-# set the current directory
 WORKDIR /home/pluto
-# run the rest of commands as pluto user
 USER pluto
-# copy the contents of the github repository into /home/pluto
-COPY --chown=pluto . ${HOME}
 
 ENV JULIA_PROJECT="/home/pluto/slider-server-environment"
-ENV JULIA_LOAD_PATH=":/home/pluto/"
 
-# Initialize the julia project environment that will be used to run the bind server.
-RUN julia --project="./slider-server-environment" -e "import Pkg; Pkg.instantiate(); Pkg.precompile()"
+# Cache package installation independently of notebook edits.
+COPY --chown=pluto slider-server-environment/Project.toml ./slider-server-environment/Project.toml
+RUN julia --project="./slider-server-environment" -e 'import Pkg; Pkg.instantiate(); Pkg.precompile(); using Pluto, PlutoSliderServer, PlutoUI, HypertextLiteral; Pkg.status()'
 
-# Precompile the packages in home
-RUN julia --project="." -e "import Pkg; Pkg.instantiate(); Pkg.precompile()"
-
-# The "default command" for this docker thing.
-CMD ["sh", "./slider-server-environment/start_pluto.sh"]
+COPY --chown=pluto . /home/pluto/
+CMD ["julia", "--project=/home/pluto/slider-server-environment", "/home/pluto/slider-server-environment/run_server.jl"]

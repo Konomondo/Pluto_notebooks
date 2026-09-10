@@ -33,3 +33,31 @@ Release 1.9.0 declares Pluto 1 and Julia 1.10-or-later compatibility. Its releas
 source retains github_action and all six export options used here. Verified with
 actionlint and whitespace checks; full Julia resolution/export awaits the next CI run.
 Reference: https://github.com/JuliaPluto/PlutoSliderServer.jl/blob/v1.9.0/Project.toml
+
+## Live deployment diagnosis and aligned runtime
+
+Public page https://pluto.konomondo.org/number_guessing_game.html returned HTTP 200,
+but decoded embedded state reported Package PlutoUI not found in current path in
+the imports cell. Nine cells errored and bonds were empty. HTML assets referenced
+Pluto 0.17.7 with same-origin slider server; this is not the new CI export.
+The .at backend configured in CI did not resolve during the check.
+
+The notebook manifest is Julia 1.12.7 and declares all game dependencies. Preserve it.
+CI and Docker now use Julia 1.12.7 and the same slider-server-environment Project.toml,
+with exact Pluto 1.0.3 and PlutoSliderServer 1.9.0 compatibility. CI no longer creates
+a separate temporary export environment. It exports only notebooks/ into the root
+output directory, using https://pluto.konomondo.org as the interactive backend.
+
+Docker installs and verifies Pluto, PlutoSliderServer, PlutoUI and HypertextLiteral
+at build time. Its default command now runs run_server.jl directly; that file activates
+the explicit project, instantiates packages, checks runtime versions and logs versions.
+The old start_pluto.sh is no longer the image default command.
+
+Deployment follow-through: commit/push, wait for successful image build, then pull and
+recreate the Portainer container. Check that Portainer has no command override or mounted
+old project/source masking the image files. Logs should show Julia 1.12.7, Pluto 1.0.3,
+and PlutoSliderServer 1.9.0. No remote containers were changed during diagnosis.
+
+Validation: actionlint, TOML parsing, dependency/version consistency and CRLF passed;
+official julia:1.12.7 Docker tag verified for linux/amd64. Local Docker daemon unavailable,
+so image build and live notebook recovery remain unverified.
