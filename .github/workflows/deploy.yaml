@@ -28,7 +28,7 @@ jobs:
             - name: 🙌 Install Julia
               uses: julia-actions/setup-julia@v3.0.2
               with:
-                  version: "1" # This will automatically pick the latest Julia version
+                  version: "1.12.7" # Keep aligned with the Docker image and notebook environment.
             - name: ⏱ Cache Julia artifacts & such
               uses: julia-actions/cache@v3.3.0
               with:
@@ -48,31 +48,22 @@ jobs:
               env:
                 JULIA_PROJECT: "./slider-server-environment"
       
-            - name: Install notebook requirements
-              run: julia -e 'import Pkg; Pkg.instantiate();'
-              env:
-                JULIA_PROJECT: "."
-
             # PlutoSliderServer 0.3 requires old Pluto versions incompatible with modern Julia.
             - name: Run & export Pluto notebooks
               run: |
-                julia -e 'using Pkg
-                  Pkg.activate(mktempdir())
-                  Pkg.add([
-                    Pkg.PackageSpec(name="PlutoSliderServer", version=v"1.9.0"),
-                  ])
-                  import PlutoSliderServer
-                  PlutoSliderServer.github_action(".";
+                julia --project=./slider-server-environment -e 'import Pluto, PlutoSliderServer, PlutoUI, HypertextLiteral
+                  println("Julia ", VERSION, "; Pluto ", pkgversion(Pluto), "; PlutoSliderServer ", pkgversion(PlutoSliderServer))
+                  PlutoSliderServer.github_action("./notebooks";
+                    Export_output_dir=pwd(),
                     Export_cache_dir="pluto_state_cache",
                     Export_baked_notebookfile=false,
                     Export_baked_state=false,
                     Export_disable_ui=false,
                     Export_offer_binder=true, 
-                    Export_slider_server_url="https://pluto.konomondo.at"
+                    Export_slider_server_url="https://pluto.konomondo.org"
                     # more parameters can go here
                   )'
               env:
-                JULIA_LOAD_PATH: ":."
                 JULIA_PROJECT: "./slider-server-environment"
             - name: 🚀 Build and Deploy to GitHub Pages
               uses: JamesIves/github-pages-deploy-action@v4.9.0
