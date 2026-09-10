@@ -26,3 +26,10 @@ References:
 - https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
 - https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility
 - https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+Export resolver fix: the temporary export project now pins PlutoSliderServer to v1.9.0.
+The former 0.3.2-0.3 requirement forced Pluto <=0.19.47 and failed on Julia 1.13.
+Release 1.9.0 declares Pluto 1 and Julia 1.10-or-later compatibility. Its released
+source retains github_action and all six export options used here. Verified with
+actionlint and whitespace checks; full Julia resolution/export awaits the next CI run.
+Reference: https://github.com/JuliaPluto/PlutoSliderServer.jl/blob/v1.9.0/Project.toml

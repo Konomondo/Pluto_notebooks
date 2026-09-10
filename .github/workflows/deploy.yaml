@@ -53,12 +53,13 @@ jobs:
               env:
                 JULIA_PROJECT: "."
 
+            # PlutoSliderServer 0.3 requires old Pluto versions incompatible with modern Julia.
             - name: Run & export Pluto notebooks
               run: |
                 julia -e 'using Pkg
                   Pkg.activate(mktempdir())
                   Pkg.add([
-                    Pkg.PackageSpec(name="PlutoSliderServer", version="0.3.2-0.3"),
+                    Pkg.PackageSpec(name="PlutoSliderServer", version=v"1.9.0"),
                   ])
                   import PlutoSliderServer
                   PlutoSliderServer.github_action(".";

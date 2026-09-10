@@ -18,3 +18,8 @@ All eight declare node24.
 
 ## Outcome
 Implemented and passed actionlint v1.7.12 and git diff --check. All eight final action refs verified against their tagged metadata as Node 24. No deployment triggered. Existing remote package access remains unverified. Operational notes promoted to ../knowledge/deployment.md.
+
+## Export package resolver repair
+The next run failed because the temporary export project pins PlutoSliderServer 0.3, forcing Pluto <=0.19.47, incompatible with the Julia 1.13 runner. Replace that obsolete requirement with the verified PlutoSliderServer 1.9.0 release (Pluto 1, Julia >=1.10). Retain the existing export environment structure and settings; verify github_action and all supplied export options against released source, then run actionlint and CRLF checks.
+
+Resolver repair outcome: pinned export dependency to exact v1.9.0. Released API and all six configuration options verified; actionlint and git diff --check passed. Full CI execution remains unverified.
