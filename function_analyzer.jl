@@ -28,6 +28,13 @@ Use `x`, `b`, `pi` (or `π`) and `e`; operators `+ - * / ^`; and
 Example: `sin(x) + b*x^2`. Use `*` for multiplication.
 """
 
+# ╔═╡ 759c43dd-ef0a-4d91-9956-488e833fdce4
+md"""
+$(@bind simplify_formula CheckBox(default=false)) **Simplify formula**
+
+Leave unchecked to display the entered expression; check to combine and simplify terms.
+"""
+
 # ╔═╡ f7e39d29-4391-4f68-9d6e-bab9c815e87b
 md"""
 #### Choose the parameter of ``x_b``: 👉 $(@bind x_point Scrubbable(0:0.2:10))
@@ -44,7 +51,7 @@ to match the desired slope
 if formula_input.ast === nothing
     md"Enter a supported mathematical formula above to draw the graph."
 else
-    plot(x_range, y_val, linewidth = 3, label = latexstring("\\textrm{Polynom:} y(x)=") * equation, legendfont = font(14,"Computer Modern"), title = "Find " * latexstring(b) * " so that " * latexstring("y'($(x_point)) = 2"), titlefont = font(20,"Computer Modern"), legend = :top)
+    plot(x_range, y_val, linewidth = 3, label = formula_label, legendfont = font(14,"Computer Modern"), title = "Find " * latexstring(b) * " so that " * latexstring("y'($(x_point)) = 2"), titlefont = font(20,"Computer Modern"), legend = :top)
 	plot!(x_range, slope .* x_range .+ y_point .- x_point*slope, linewidth = 2, style = :dash, alpha = 0.7, label = latexstring("\\textrm{Slope:} y'($(x_point)) = $(round(slope, digits = 2))"), xlabel = latexstring("x"), ylabel = latexstring("y(x)"), guidefont = font(14, "Computer Modern"), tickfont = font(10, "Computer Modern"))
 	plot!([x_point], [y_point], marker = :o, label = :none, ylim = [-25, 70])
 end
@@ -91,7 +98,17 @@ else
 end
 
 # ╔═╡ 9188b13a-7f3a-4091-baa6-e37cedd65e64
-equation = symbolic_formula === nothing ? "" : string(Symbolics.latexify(symbolic_formula))
+begin
+    display_formula = if formula_input.ast === nothing
+        nothing
+    elseif simplify_formula
+        symbolic_formula === nothing ? nothing : Symbolics.simplify(symbolic_formula)
+    else
+        formula_input.ast
+    end
+    equation = display_formula === nothing ? "" : Symbolics.latexify(display_formula; env=:raw)
+    formula_label = latexstring("\\textrm{Polynom:} y(x)=", equation)
+end
 
 # ╔═╡ 6bf0389f-1570-436f-84d2-ef7e13b1ff77
 equation2 = replace(equation[1:end], "b" => "{\\color{blue}b}")
@@ -238,6 +255,7 @@ SymbolicUtils.@syms a b
 # ╔═╡ Cell order:
 # ╟─ec27106b-574e-4f76-a701-afe08165d984
 # ╟─8883936b-cda0-42a9-b514-b80b140d466e
+# ╟─759c43dd-ef0a-4d91-9956-488e833fdce4
 # ╟─f7e39d29-4391-4f68-9d6e-bab9c815e87b
 # ╟─538a435b-12a8-413e-82ac-792e1805bfc1
 # ╟─73bc4715-f9fd-4d79-bbe8-0bf77302eba4
