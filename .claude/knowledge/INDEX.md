@@ -4,4 +4,4 @@
 
 - [Deployment workflow](deployment.md): shared notebook environment, tested dependency pins, local Julia/Chromium checks, CI gates, Docker and self-hosted deployment.
 
-- [Function analyzer](function-analyzer.md): restricted mathematical language, direct AST interpreter, domain handling and security regression tests.
+- [Function analyzer](function-analyzer.md): restricted mathematical language, direct AST interpreter, domain handling, inline LaTeX plot labels, optional simplification and regression tests.

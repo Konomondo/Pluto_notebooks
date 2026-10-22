@@ -36,5 +36,26 @@ with sync_playwright() as p:
         )
         assert page.evaluate("Object.values(window.editor_state.notebook.cell_results).every(c => !c.errored)")
     assert page.locator(graph).locator("img,svg").count() > 0
-    print("PASS: Chromium math input, code rejection, real-domain message and graph recovery")
+    checkbox = page.locator('bond[def="simplify_formula"] input[type="checkbox"]')
+    assert not checkbox.is_checked()
+    field.fill("x+x")
+    with page.expect_response(lambda r: "/staterequest/" in r.url, timeout=60000) as response:
+        submit.click()
+    assert response.value.status == 200
+    equation = 'pluto-cell[id="9188b13a-7f3a-4091-baa6-e37cedd65e64"] pluto-output'
+    page.wait_for_function("selector => document.querySelector(selector).textContent.includes('+')",arg=equation,timeout=60000)
+    screenshots = base / ".local"
+    screenshots.mkdir(exist_ok=True)
+    page.locator(graph).screenshot(path=str(screenshots / "analyzer-original-formula.png"))
+    for enabled in [True, False]:
+        with page.expect_response(lambda r: "/staterequest/" in r.url, timeout=60000) as response:
+            checkbox.set_checked(enabled)
+        assert response.value.status == 200
+        page.wait_for_function(
+            "([enabled, selector]) => window.editor_state.notebook.bonds.simplify_formula.value === enabled && Object.values(window.editor_state.notebook.cell_results).every(c => !c.running && !c.queued && !c.errored) && document.querySelector(selector).textContent.includes('+') !== enabled",
+            arg=[enabled, equation], timeout=60000,
+        )
+        if enabled:
+            page.locator(graph).screenshot(path=str(screenshots / "analyzer-simplified-formula.png"))
+    print("PASS: Chromium formula entry/rejection/recovery and simplify checkbox x+x -> 2x -> x+x")
     browser.close()

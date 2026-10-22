@@ -143,3 +143,47 @@ All four notebooks pass startup validation. Source/version/manifest/security tes
 files match the workspace hashes. Chromium game and restricted-formula tests pass
 against Docker. The native server was replaced by Compose on localhost:1234.
 Remote Actions publication and self-hosted deployment remain user-operated.
+
+
+## Repair analyzer LaTeX legend locally (2026-10-22)
+
+Reproduce the reported equation-environment text in the plot legend using the
+locked local Julia environment. Request raw LaTeX from Symbolics.latexify and
+compose the entire plot label as one LaTeXString. Keep the restricted interpreter.
+Add a targeted regression check of the actual notebook label, including default
+polynomial, changed formulas and invalid-input recovery; inspect the local rendered
+plot in Chromium and save a screenshot. Run the focused analyzer integration test,
+verify CRLF and record the rendering contract in function-analyzer knowledge.
+Continue this deployment plan; its previously suggested broader filename remains
+shared-environment-local-tests-deployment.md.
+
+Outcome: reproduced both the equation wrapper and loss of LaTeXString type.
+The notebook now requests env=:raw and passes one complete formula_label to Plots.
+Actual Chromium screenshots confirm proper superscripts and math rendering for
+the default polynomial and changed sine/polynomial formulas. Focused analyzer
+integration passes 44/44 assertions, including actual plot-series label type,
+delimiters, no equation environments and rejected-input recovery. Cell order,
+no-eval path and CRLF checks pass. Local preview remains on port 17892; no image
+was rebuilt or remotely published. This fix needs a new image for production.
+
+
+## Optional formula simplification checkbox (2026-10-22)
+
+Add an unchecked Simplify formula checkbox next to the analyzer input. Default
+LaTeX comes from the validated parsed expression, preserving term order, fractions
+and repeated terms rather than evaluating/simplifying them. Checked mode uses the
+symbolic expression with explicit Symbolics.simplify. Both display cells and plot
+legend use the same selection. Calculation, derivatives and validation stay as
+before. Test HTTP checkbox toggles with x+x, verify label changes without changing
+numeric results, retain rejection/recovery and LaTeX label assertions, and inspect
+the checkbox and graph locally in Chromium. Update existing knowledge and CRLF.
+Continue the existing plan; the previously suggested broader filename still fits.
+
+Outcome: added unchecked Simplify formula checkbox. Original validated AST supplies
+unsimplified LaTeX by default; checked mode uses Symbolics.simplify. The same
+selection feeds the standalone formula and plot legend. Focused analyzer tests
+pass 57/57 assertions, including x+x -> 2x -> x+x with unchanged numeric samples.
+Chromium confirms the visible checkbox works and the graph recovers after invalid
+input. Preview refreshed on localhost:17892. All 47 cell IDs/order entries match;
+no eval calls, Python syntax and CRLF checks pass. No package/manifest changes,
+image build or publication. Contract and screenshots recorded in knowledge.

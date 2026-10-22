@@ -59,7 +59,9 @@ Chromium with `PLAYWRIGHT_BROWSERS_PATH` set to `.local/browsers`, set
 Enter mathematical formulas using `x`, `b`, `pi` (or the Unicode pi symbol), `e`,
 `+ - * / ^`, parentheses, and `sin`, `cos`, `tan`, `exp`, `log`, `sqrt`.
 Powers require literal integer exponents from -8 to 8. For example:
-`sin(x) + b*x^2`. Programming syntax is rejected and formulas are limited in size
+`sin(x) + b*x^2`. The **Simplify formula** checkbox starts off: the
+LaTeX then follows the entered expression's structure. Enable it to combine and
+simplify terms in the displayed formula; calculations are unchanged. Programming syntax is rejected and formulas are limited in size
 and complexity. Points outside the real-valued domain are omitted from the graph.
 
 Run the input and symbolic derivative regression tests with:

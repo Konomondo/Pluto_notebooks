@@ -48,6 +48,18 @@ function check_ready(context)
             actual = Pluto.WorkspaceManager.eval_fetch_in_workspace((context.server_session, notebook), first(changed))
             @test actual == last(changed)
             if session.path == "function_analyzer.jl"
+                function check_latex_label()
+                    valid_label = Pluto.WorkspaceManager.eval_fetch_in_workspace(
+                        (context.server_session, notebook), quote
+                            let plotted_label = Plots.current().series_list[1][:label]
+                                formula_label isa LaTeXString && plotted_label isa LaTeXString &&
+                                    plotted_label == formula_label && count(==('$'), formula_label) == 2 &&
+                                    !occursin("\\begin", formula_label) && !occursin("\\end", formula_label)
+                            end
+                        end)
+                    @test valid_label
+                end
+                check_latex_label()
                 explicit_formula = PlutoSliderServer.base64urlencode(Pluto.pack(["text_equation"]))
                 endpoint = "$base/staterequest/$(session.current_hash)/?explicit=$explicit_formula"
                 sources = [
@@ -70,12 +82,40 @@ function check_ready(context)
                     parsed = Pluto.WorkspaceManager.eval_fetch_in_workspace(
                         (context.server_session, notebook), :(formula_input.message === nothing))
                     @test parsed == allowed
+                    if allowed && source != "sqrt(-1) + x"
+                        check_latex_label()
+                    end
                     if allowed && source == "x^2 + b*x"
                         actual_y = Pluto.WorkspaceManager.eval_fetch_in_workspace(
                             (context.server_session, notebook), :(MathFormulas.plot_value(formula_input.ast, 2, b_val)))
                         @test isapprox(actual_y, 6.0)
                     end
                 end
+                @test Pluto.WorkspaceManager.eval_fetch_in_workspace(
+                    (context.server_session, notebook), :(simplify_formula === false))
+                bonds["text_equation"] = "x+x"
+                response = HTTP.post(endpoint, [], Pluto.pack(Dict(k => Dict("value" => v) for (k,v) in bonds)))
+                @test response.status == 200
+                original_latex = Pluto.WorkspaceManager.eval_fetch_in_workspace(
+                    (context.server_session, notebook), :(String(equation)))
+                original_y = Pluto.WorkspaceManager.eval_fetch_in_workspace(
+                    (context.server_session, notebook), :(copy(y_val)))
+                @test occursin("+", original_latex)
+                explicit_simplify = PlutoSliderServer.base64urlencode(Pluto.pack(["simplify_formula"]))
+                toggle_endpoint = "$base/staterequest/$(session.current_hash)/?explicit=$explicit_simplify"
+                for enabled in [true, false]
+                    bonds["simplify_formula"] = enabled
+                    response = HTTP.post(toggle_endpoint, [], Pluto.pack(Dict(k => Dict("value" => v) for (k,v) in bonds)))
+                    @test response.status == 200
+                    @test !any(c.errored for c in notebook.cells)
+                    current_latex = Pluto.WorkspaceManager.eval_fetch_in_workspace(
+                        (context.server_session, notebook), :(String(equation)))
+                    @test enabled ? !occursin("+", current_latex) : current_latex == original_latex
+                    @test Pluto.WorkspaceManager.eval_fetch_in_workspace(
+                        (context.server_session, notebook), :(copy(y_val))) == original_y
+                    check_latex_label()
+                end
+                println("PASS: simplification checkbox preserves original expression by default and leaves calculations unchanged")
                 println("PASS: formula HTTP acceptance, code rejection, real-domain handling and recovery")
             end
             println("PASS: HTTP bonds ", session.path, " ", collect(keys(bonds)))
