@@ -50,6 +50,8 @@ end
 
 # ╔═╡ 846d334a-e5ab-484a-832f-731c1290356f
 begin
+    import Pkg
+    Pkg.activate(joinpath(@__DIR__, "..", "slider-server-environment"))
 	using PlutoUI, HypertextLiteral
 end
 
