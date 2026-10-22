@@ -33,3 +33,13 @@ Keep the image @htl triple-quoted expression in its own cell. The attempted nest
 Current image source: https://cloud.konomondo.at/s/FjWKQHCWdeewyWw/download (GET verified HTTP 200, image/jpeg). Use this direct image endpoint, rather than the share preview page. It replaces the GitHub attachment which returned 404.
 
 Python listing now preserves the full supplied original, including invalid-input elif/else branches. Do not condense these branches: the user wants to present the original code. The disclosure explains the original exclusive range and ends with an explicit end marker. Python break statements are display text and cannot truncate rendering.
+
+
+2026-10-22: the active notebook now activates the shared server project directly;
+its embedded Project/Manifest have been removed. Round secrets are derived from
+the browser round ID, so cached requests and independent visitors are stateless.
+Julia scoring tests and both Chromium suites pass on the portable workspace runtime.
+The real-server browser test waits until the initial matching round state arrives;
+waiting only for initial HTML can race slider-client startup. Do not use networkidle:
+the notebook's external image can remain loading independently of interactive readiness.
+See deployment.md for the current shared-environment workflow and evidence.

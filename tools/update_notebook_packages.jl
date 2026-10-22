@@ -1,19 +1,5 @@
-
-import Pluto
-using Pkg
-
-flatmap(args...) = vcat(map(args...)...)
-
-pwd()
-all_files_recursive = flatmap(walkdir("./")) do (root, _dirs, files)
-    joinpath.((root,), files)
-end
-
-all_notebooks = filter(Pluto.is_pluto_notebook, all_files_recursive)
-
-level = getfield(Pkg, Symbol("UPLEVEL_MINOR"))
-
-for n in all_notebooks
-    @info "Updating" n
-    Pluto.update_notebook_environment(n; backup=false, level)
-end
+# Deliberate, shared update. Run setup and all tests afterward; review the Manifest.
+include(joinpath(@__DIR__, "..", "slider-server-environment", "runtime.jl"))
+Pkg.update()
+Pkg.precompile()
+Pkg.status()

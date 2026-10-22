@@ -1,0 +1,6 @@
+.git
+.claude
+.local
+build
+_not_used_notebooks
+**/__pycache__
